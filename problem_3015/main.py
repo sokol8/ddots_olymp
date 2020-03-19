@@ -4,21 +4,28 @@
 import sys
 
 
-def splitInt(number, debug) -> []
+def split_int(number, debug) -> []:
 	digits_array = []
 	while 0 < number:
-		digits_array.append(number % 10)
+		digits_array.append(int(number % 10))
 		number //= 10
 
 	return digits_array[::-1]
 
 # TEST NUMBERS AFTER DIVISION ON 42
-# 1325374 => 1234
+# 1325374 => 1234 // 1 3 2 5 3 7 4
 # 698772 => 
 # 5163758
 # 9898989
 
-def decrypt(numer, debug) -> str:
+def verify_triad(triad_array, debug) -> bool:
+	if 3 != len(triad_array):
+		if debug:
+			print("incorrect array length: {}".format(len(triad_array)))
+		return false
+	return (triad_array[0] + triad_array[2]) % 10 == triad_array[1]
+
+def decrypt(number, debug) -> str:
 		ERROR_RESPONSE = "????"
 
 		if 0 != number % 42:
@@ -26,7 +33,8 @@ def decrypt(numer, debug) -> str:
 				print("{} % 42 = {}. Must be 0".format(number, number % 42))
 			return ERROR_RESPONSE
 
-		digits_array = splitInt(number)
+		number /= 42
+		digits_array = split_int(number, debug)
 		if debug:
 			print("digits_array: {}".format(digits_array))
 
@@ -35,9 +43,26 @@ def decrypt(numer, debug) -> str:
 				print("Incorrect number {} length: {}".format(number, len(digits_array)))
 			return ERROR_RESPONSE
 
-		#### ANALYZE DIGITS HERE
+		response_array = []
+		
+		# digits_array = [1, 3, 2, 5, 3, 7, 4]
+		# digits_array[0:3] = [1, 3, 2]
+		# digits_array[2:5] = [2, 5, 3]
+		# digits_array[4:7] = [3, 7, 4]
 
-		return ERROR_RESPONSE
+		for i in [0, 2, 4]:
+			if verify_triad(digits_array[i : i + 3], debug):
+				response_array.append(str(digits_array[i]))
+			else:
+				if debug:
+					print("Failed verifyig [{}:{}] triad = {} ".format(i, i + 3, digits_array[i : i + 3]))
+				return ERROR_RESPONSE
+
+		response_array.append(str(digits_array[6]))
+		if debug:
+			print("response_array = {} ".format(i, i + 3, response_array[i : i + 3]))
+
+		return "".join(response_array)
 
 
 def solve(numbers_array, debug) -> str:
@@ -46,7 +71,7 @@ def solve(numbers_array, debug) -> str:
 
 	decrypted_numbers_array = []
 	for number in numbers_array:
-		decrypted_number = decrypt(number)
+		decrypted_number = decrypt(number, debug)
 		decrypted_numbers_array.append(decrypted_number)
 
 		if debug:
@@ -62,13 +87,14 @@ def solve(numbers_array, debug) -> str:
 
 # Get Input from STDIN
 lines = []
-DEBUG_MODE = True
-DEVELOP_MODE = True
+DEBUG_MODE = False
+DEVELOP_MODE = False
 
 if DEVELOP_MODE:
 
 	numbers_array = [55665708, 29348432, 216877836, 415757538]
 	solution = solve(numbers_array, DEBUG_MODE)
+	print(solution)
 
 else:
 	for line in sys.stdin:
